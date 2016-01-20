@@ -46,13 +46,13 @@ list_keys() {
 
 case "$1" in
   --init)
-    init_repo $2
+    init_repo "$2"
   ;;
   --add-key)
-      add_key $2
+      add_key "$2"
   ;;
   --remove-key)
-    remove_key $2
+    remove_key "$2"
   ;;
   --list-keys)
     list_keys
