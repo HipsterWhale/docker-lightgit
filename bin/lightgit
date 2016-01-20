@@ -26,6 +26,7 @@ case "$1" in
       exit 1
     fi
     cat /var/git/.ssh/authorized_keys | grep -v "$2" > /var/git/.ssh/authorized_keys
+    ;;
   *)
     echo ""
     echo "lightgit usage : "
