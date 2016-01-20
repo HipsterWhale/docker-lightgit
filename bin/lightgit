@@ -1,38 +1,63 @@
 #!/bin/sh
 
+print_usage() {
+  echo ""
+  echo "lightgit usage : "
+  echo "  --init [REPO NAME] : init a git repo"
+  echo "  --add-key [SSH KEY TO ADD] : adding an ssh key to the git user"
+  echo "  --remove-key [NAME OF SSH KEY TO REMOVE] : remove an ssh key to the git user"
+  echo "  --list-keys : list all authorized keys for git user"
+  echo ""
+}
+
+init_repo() {
+  if [ -z "$1" ]; then
+    echo "You must specify the name of the new repository."
+    exit 1
+  fi
+  echo "Creating new repository, access : [git@host:publicport]:/repos/$2.git"
+  mkdir -p /repos/$1.git
+  cd /repos/$1.git
+  git --bare init
+  chown -R git:git /repos/$1.git
+  exit 0
+}
+
+add_key() {
+  if [ -z "$1" ]; then
+    echo "You must specify the ssh key to add."
+    exit 1
+  fi
+  echo $1 >> /var/git/.ssh/authorized_keys
+  exit 0
+}
+
+remove_key() {
+  if [ -z "$1" ]; then
+    echo "You must specify the name of the SSH key to remove."
+    exit 1
+  fi
+  cat /var/git/.ssh/authorized_keys | grep -v "$1" > /var/git/.ssh/authorized_keys
+}
+
+list_keys() {
+  cat /var/git/.ssh/authorized_keys | awk '{print " -> " $3}'
+}
+
 case "$1" in
   --init)
-    if [ -z "$2" ]; then
-      echo "You must specify the name of the new repository."
-      exit 1
-    fi
-    echo "Creating new repository, access : [git@192.168.99.100:7999]:/repos/$2.git"
-    mkdir -p /repos/$2.git
-    cd /repos/$2.git
-    git --bare init
-    chown -R git:git /repos/$2.git
-    exit 0
-    ;;
-  --add-ssh-key)
-    if [ -z "$2" ]; then
-      echo "You must specify the ssh key to add."
-      exit 1
-    fi
-    echo $2 >> /var/git/.ssh/authorized_keys
-    ;;
-  --remove-ssh-key)
-    if [ -z "$2" ]; then
-      echo "You must specify the name of the SSH key to remove."
-      exit 1
-    fi
-    cat /var/git/.ssh/authorized_keys | grep -v "$2" > /var/git/.ssh/authorized_keys
-    ;;
+    init_repo $2
+  ;;
+  --add-key)
+      add_key $2
+  ;;
+  --remove-key)
+    remove_key $2
+  ;;
+  --list-keys)
+    list_keys
+  ;;
   *)
-    echo ""
-    echo "lightgit usage : "
-    echo "  --init [REPO NAME]"
-    echo "  --add-ssh-key [SSH KEY TO ADD]"
-    echo "  --remove-ssh-key [NAME OF SSH KEY TO REMOVE]"
-    echo ""
-    ;;
+    print_usage
+  ;;
 esac
