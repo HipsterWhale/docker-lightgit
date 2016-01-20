@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ ! -d "/var/git/.ssh" ]; then
+  mkdir -p /var/git/.ssh
+  touch /var/git/.ssh/authorized_keys
+  chown -R git:git /var/git/.ssh
+fi
+
+if [ ! -f "/etc/ssh/ssh_host_rsa_key" ]; then
+  /usr/bin/ssh-keygen -A
+fi
+
+chown git:git -R /repos
+
+exec "$@"
